@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비키의 다이어트 기록표</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        
+        .week-container {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .week-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .week-title::before {
+            content: "📅";
+            font-size: 20px;
+        }
+        
+        .days-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .day-label {
+            font-size: 12px;
+            color: #718096;
+            text-align: center;
+            margin-bottom: 5px;
+            width: 50px;
+        }
+        
+        .day-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .day-status {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .day-status:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+        
+        .fail {
+            background: linear-gradient(135deg, #fc8181, #e53e3e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(252, 129, 129, 0.3);
+        }
+        
+        .empty {
+            background: #e2e8f0;
+            color: #a0aec0;
+            border: 2px dashed #cbd5e0;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .motivational-quote {
+            text-align: center;
+            font-style: italic;
+            color: #4a5568;
+            margin-top: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 500;
+        }
+        
+        .instruction {
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ 비키의 다이어트 기록표 ✨</h1>
+        
+        <div class="instruction">
+            💡 원하는 날짜를 클릭해서 절식/식사 여부를 기록해보세요!
+        </div>
+        
+        <div class="week-container">
+            <div class="week-title">8월 4주</div>
+            <div class="days-container">
+                <div class="day-group">
+                    <div class="day-label">월</div>
+                    <div class="day-status success" onclick="toggleStatus(this)">O</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">화</div>
+                    <div class="day-status success" onclick="toggleStatus(this)">O</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">수</div>
+                    <div class="day-status fail" onclick="toggleStatus(this)">X</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">목</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">금</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">토</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">일</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="week-container">
+            <div class="week-title">9월 1주</div>
+            <div class="days-container">
+                <div class="day-group">
+                    <div class="day-label">월</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">화</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">수</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">목</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">금</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">토</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">일</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="week-container">
+            <div class="week-title">9월 2주</div>
+            <div class="days-container">
+                <div class="day-group">
+                    <div class="day-label">월</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">화</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">수</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">목</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">금</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">토</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">일</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="week-container">
+            <div class="week-title">9월 3주</div>
+            <div class="days-container">
+                <div class="day-group">
+                    <div class="day-label">월</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">화</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">수</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">목</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">금</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">토</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">일</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="week-container">
+            <div class="week-title">9월 4주</div>
+            <div class="days-container">
+                <div class="day-group">
+                    <div class="day-label">월</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">화</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">수</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">목</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">금</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">토</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+                <div class="day-group">
+                    <div class="day-label">일</div>
+                    <div class="day-status empty" onclick="toggleStatus(this)">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-circle success"></div>
+                <span>금식 성공 (O)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-circle fail"></div>
+                <span>저녁 식사 (X)</span>
+            </div>
+        </div>
+        
+        <div class="motivational-quote">
+            "작은 성공들이 모여 큰 변화를 만듭니다! 💪"
+        </div>
+    </div>
+
+    <script>
+        function toggleStatus(element) {
+            // 현재 상태 확인
+            if (element.classList.contains('empty')) {
+                // 비어있으면 → 성공 (O)
+                element.className = 'day-status success';
+                element.textContent = 'O';
+            } else if (element.classList.contains('success')) {
+                // 성공이면 → 실패 (X)
+                element.className = 'day-status fail';
+                element.textContent = 'X';
+            } else if (element.classList.contains('fail')) {
+                // 실패면 → 비어있음 (-)
+                element.className = 'day-status empty';
+                element.textContent = '-';
+            }
+        }
+    </script>
+</body>
+</html>
