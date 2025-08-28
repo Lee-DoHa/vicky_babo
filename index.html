@@ -338,36 +338,27 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'vickyDietTrackerData';
-            let appData = {
-                statuses: {},
-                guestbook: []
-            };
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-            // --- Data Persistence ---
-            function saveData() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        async function main() {
+            // Fetch the configuration from our secure API endpoint
+            const response = await fetch('/api/config');
+            if (!response.ok) {
+                console.error("Failed to fetch Firebase config.");
+                alert("Firebase 설정을 불러오는 데 실패했습니다. Vercel 환경 변수가 올바르게 설정되었는지 확인하세요.");
+                return;
             }
+            const firebaseConfig = await response.json();
 
-            function loadData() {
-                const data = localStorage.getItem(STORAGE_KEY);
-                if (data) {
-                    appData = JSON.parse(data);
-                }
-            }
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
 
             // --- Diet Tracker ---
-            function applyStatuses() {
-                document.querySelectorAll('.day-status').forEach(el => {
-                    const weekId = el.closest('.week-container').dataset.weekId;
-                    const dayId = el.dataset.dayId;
-                    const key = `w${weekId}d${dayId}`;
-                    const status = appData.statuses[key] || 'empty';
-                    updateElementStatus(el, status);
-                });
-            }
+            const trackerDocRef = doc(db, "vicky-data", "tracker-status");
 
             function updateElementStatus(element, status) {
                 element.className = `day-status ${status}`;
@@ -380,7 +371,7 @@
                 }
             }
 
-            function toggleStatus(element) {
+            async function toggleStatus(element) {
                 const weekId = element.closest('.week-container').dataset.weekId;
                 const dayId = element.dataset.dayId;
                 const key = `w${weekId}d${dayId}`;
@@ -394,48 +385,78 @@
                 else if (currentStatus === 'success') nextStatus = 'fail';
                 else nextStatus = 'empty';
 
-                appData.statuses[key] = nextStatus;
-                updateElementStatus(element, nextStatus);
-                saveData();
+                try {
+                    await setDoc(trackerDocRef, { [key]: nextStatus }, { merge: true });
+                } catch (error) {
+                    console.error("Error updating status: ", error);
+                    alert("상태 업데이트에 실패했습니다. 콘솔을 확인해주세요.");
+                }
             }
+
+            // Listen for real-time tracker updates
+            onSnapshot(trackerDocRef, (docSnap) => {
+                const statuses = docSnap.exists() ? docSnap.data() : {};
+                document.querySelectorAll('.day-status').forEach(el => {
+                    const weekId = el.closest('.week-container').dataset.weekId;
+                    const dayId = el.dataset.dayId;
+                    const key = `w${weekId}d${dayId}`;
+                    const status = statuses[key] || 'empty';
+                    updateElementStatus(el, status);
+                });
+            }, (error) => {
+                console.error("Error listening to tracker updates: ", error);
+                alert("데이터를 실시간으로 불러오는 데 실패했습니다.");
+            });
 
             // --- Guestbook ---
             const guestbookForm = document.getElementById('guestbook-form');
             const guestbookInput = document.getElementById('guestbook-input');
             const guestbookMessages = document.getElementById('guestbook-messages');
+            const guestbookCollectionRef = collection(db, "guestbook");
+            const q = query(guestbookCollectionRef, orderBy("timestamp", "asc"));
 
-            function renderGuestbook() {
+            // Listen for real-time guestbook updates
+            onSnapshot(q, (querySnapshot) => {
                 guestbookMessages.innerHTML = '';
-                appData.guestbook.forEach(msg => {
+                querySnapshot.forEach((doc) => {
+                    const message = doc.data().message;
                     const messageEl = document.createElement('div');
                     messageEl.className = 'guestbook-message';
-                    messageEl.textContent = msg;
+                    messageEl.textContent = message;
                     guestbookMessages.appendChild(messageEl);
                 });
                 guestbookMessages.scrollTop = guestbookMessages.scrollHeight;
-            }
+            }, (error) => {
+                console.error("Error listening to guestbook updates: ", error);
+            });
 
-            guestbookForm.addEventListener('submit', (e) => {
+            guestbookForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const message = guestbookInput.value.trim();
                 if (message) {
-                    appData.guestbook.push(message);
-                    saveData();
-                    renderGuestbook();
-                    guestbookInput.value = '';
+                    try {
+                        guestbookForm.querySelector('button').disabled = true;
+                        await addDoc(guestbookCollectionRef, {
+                            message: message,
+                            timestamp: serverTimestamp()
+                        });
+                        guestbookInput.value = '';
+                    } catch (error) {
+                        console.error("Error adding document: ", error);
+                        alert('메시지를 추가하는 데 실패했습니다. 콘솔을 확인해주세요.');
+                    } finally {
+                        guestbookForm.querySelector('button').disabled = false;
+                    }
                 }
             });
 
             // --- Initialization ---
-            loadData();
-            applyStatuses();
-            renderGuestbook();
-
-            // Make toggleStatus globally available for onclick attributes
             document.querySelectorAll('.day-status').forEach(el => {
                 el.addEventListener('click', () => toggleStatus(el));
             });
-        });
+        }
+
+        document.addEventListener('DOMContentLoaded', main);
     </script>
 </body>
 </html>
